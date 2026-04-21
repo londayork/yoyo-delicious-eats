@@ -1,0 +1,157 @@
+image: "https://via.placeholder.com/200"
+image: "https://your-image-link.com/cookies.jpg"
+{
+  id: 1,
+  name: "Chocolate Chip Cookies",
+  price: 12.99,
+  link: "...",
+  image: "..."
+}
+{
+  id: 4,
+  name: "Brownies",
+  price: 10.99,
+  link: "YOUR_STRIPE_LINK",
+  image: "YOUR_IMAGE_LINK"
+}
+import React, { useEffect, useState } from "react";
+
+const STORAGE_KEY = "yoyo_products_v1";
+
+const defaultProducts = [
+  { id: 1, name: "Chocolate Chip Cookies", price: 12.99, stock: 10, image: "", link: "https://buy.stripe.com/REPLACE_COOKIE_LINK" },
+  { id: 2, name: "Strawberry Cupcakes", price: 15.99, stock: 8, image: "", link: "https://buy.stripe.com/REPLACE_CUPCAKE_LINK" },
+  { id: 3, name: "Sea Moss Gel", price: 25.0, stock: 5, image: "", link: "https://buy.stripe.com/REPLACE_SEAMOSS_LINK" }
+];
+
+function loadProducts() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return defaultProducts;
+    return JSON.parse(raw);
+  } catch {
+    return defaultProducts;
+  }
+}
+
+function saveProducts(products) {
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+}
+
+export default function YoYosStore() {
+  const [products, setProducts] = useState(loadProducts());
+  const [showAdmin, setShowAdmin] = useState(false);
+  const [newProduct, setNewProduct] = useState({ name: "", price: "", stock: "", image: "", link: "" });
+
+  useEffect(() => {
+    saveProducts(products);
+  }, [products]);
+
+  // 📸 HANDLE IMAGE UPLOAD (NO LINKS NEEDED)
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setNewProduct((prev) => ({ ...prev, image: reader.result }));
+    };
+    reader.readAsDataURL(file);
+  };
+
+  const addProduct = () => {
+    if (!newProduct.name || !newProduct.price) return;
+    const newItem = {
+      id: Date.now(),
+      name: newProduct.name,
+      price: parseFloat(newProduct.price),
+      stock: parseInt(newProduct.stock || "0", 10),
+      image: newProduct.image,
+      link: newProduct.link
+    };
+    setProducts((prev) => [...prev, newItem]);
+    setNewProduct({ name: "", price: "", stock: "", image: "", link: "" });
+  };
+
+  // 📦 INVENTORY: decrement stock on purchase click
+  const handleBuy = (product) => {
+    if (product.stock <= 0) return;
+
+    // decrease stock locally
+    setProducts((prev) =>
+      prev.map((p) =>
+        p.id === product.id ? { ...p, stock: p.stock - 1 } : p
+      )
+    );
+
+    // redirect to Stripe link
+    if (product.link) {
+      window.location.href = product.link;
+    }
+  };
+
+  return (
+    <div style={{ minHeight: "100vh", background: "linear-gradient(to bottom right, #fbcfe8, #e9d5ff)", padding: "20px" }}>
+      {/* Header */}
+      <header style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "30px" }}>
+        <h1 style={{ color: "#7e22ce" }}>Yo-Yo's Delicious Eats</h1>
+        <button onClick={() => setShowAdmin(!showAdmin)} style={{ background: "#9333ea", color: "white", padding: "10px", borderRadius: "8px" }}>
+          Admin
+        </button>
+      </header>
+
+      {/* Hero */}
+      <section style={{ textAlign: "center", marginBottom: "30px" }}>
+        <h2>Fresh Cookies, Sweets & Sea Moss 🍪</h2>
+        <p>Order now and get it delivered 💜</p>
+      </section>
+
+      {/* Products */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))", gap: "20px" }}>
+        {products.map((product) => (
+          <div key={product.id} style={{ background: "white", padding: "15px", borderRadius: "15px", boxShadow: "0 4px 10px rgba(0,0,0,0.1)" }}>
+            {product.image ? (
+              <img src={product.image} alt={product.name} style={{ width: "100%", borderRadius: "10px" }} />
+            ) : (
+              <div style={{ height: 180, background: "#f3f4f6", borderRadius: 10 }} />
+            )}
+            <h3>{product.name}</h3>
+            <p>${product.price}</p>
+            <p style={{ fontSize: 12, color: product.stock > 0 ? "#16a34a" : "#dc2626" }}>
+              {product.stock > 0 ? `In stock: ${product.stock}` : "Out of stock"}
+            </p>
+
+            <button
+              disabled={product.stock <= 0}
+              onClick={() => handleBuy(product)}
+              style={{ width: "100%", background: product.stock > 0 ? "#ec4899" : "#9ca3af", color: "white", padding: "10px", borderRadius: "8px", marginTop: "10px", cursor: product.stock > 0 ? "pointer" : "not-allowed" }}
+            >
+              {product.stock > 0 ? "Buy Now" : "Sold Out"}
+            </button>
+          </div>
+        ))}
+      </div>
+
+      {/* Admin Panel */}
+      {showAdmin && (
+        <div style={{ marginTop: "30px", background: "white", padding: "20px", borderRadius: "15px" }}>
+          <h2>Admin Panel</h2>
+          <input placeholder="Name" value={newProduct.name} onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
+          <input placeholder="Price" value={newProduct.price} onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} />
+          <input placeholder="Stock" value={newProduct.stock} onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })} />
+          <input type="file" accept="image/*" onChange={handleImageUpload} />
+          <input placeholder="Stripe Link" value={newProduct.link} onChange={(e) => setNewProduct({ ...newProduct, link: e.target.value })} />
+          <br /><br />
+          <button onClick={addProduct} style={{ background: "#ec4899", color: "white", padding: "10px", borderRadius: "8px" }}>
+            Add Product
+          </button>
+        </div>
+      )}
+
+      {/* Footer */}
+      <footer style={{ marginTop: "40px", textAlign: "center" }}>
+        <p>Contact: yoyodeats@gmail.com</p>
+        <p>© 2026 Yo-Yo's Delicious Eats</p>
+      </footer>
+    </div>
+  );
+}
