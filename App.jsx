@@ -68,8 +68,18 @@ export default function YoYosStore() {
           <img src="/logo.png" style={{ width: 60, borderRadius: "50%" }} />
           <h1 style={{ color: "white" }}>Yo-Yo's Delicious Eats</h1>
         </div>
-        <button onClick={() => setShowAdmin(!showAdmin)}>Admin</button>
-      </div>
+       <button
+  onClick={() => {
+    const password = prompt("Enter admin password");
+    if (password === "My3sons1978!") {
+      setShowAdmin(!showAdmin);
+    } else {
+      alert("Wrong password");
+    }
+  }}
+>
+  Admin
+</button>
 
       {/* HERO */}
       <div style={{ textAlign: "center", color: "white", margin: "20px 0" }}>
