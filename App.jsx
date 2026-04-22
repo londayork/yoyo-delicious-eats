@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from "react";
 
-const STORAGE_KEY = "yoyo_store_db";
+// 🔥 Firebase imports
+import { initializeApp } from "firebase/app";
+import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+
+// 🔥 YOUR Firebase config (already added)
+const firebaseConfig = {
+  apiKey: "AIzaSyC0bfI2ckY0QLsUwxt8dojAk4a65-0axU8",
+  authDomain: "yoyo-delicious-eats.firebaseapp.com",
+  projectId: "yoyo-delicious-eats",
+  storageBucket: "yoyo-delicious-eats.firebasestorage.app",
+  messagingSenderId: "107422339618",
+  appId: "1:107422339618:web:ab40e45ae2238241efb07b",
+  measurementId: "G-PQ88RKGGHE"
+};
+
+// 🔥 Initialize Firebase
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
 export default function YoYosStore() {
   const [products, setProducts] = useState([]);
@@ -15,51 +32,62 @@ export default function YoYosStore() {
     link: ""
   });
 
-  // Load products
+  // 🔄 LOAD PRODUCTS FROM FIREBASE
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) setProducts(JSON.parse(saved));
+    const loadProducts = async () => {
+      const querySnapshot = await getDocs(collection(db, "products"));
+      const items = querySnapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+      setProducts(items);
+    };
+
+    loadProducts();
   }, []);
 
-  // Save products
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
-  }, [products]);
-
-  // Upload image
+  // 📸 IMAGE UPLOAD (temporary base64 for now)
   const handleImageUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+
     const reader = new FileReader();
     reader.onloadend = () => {
-      setNewProduct((prev) => ({ ...prev, image: reader.result }));
+      setNewProduct(prev => ({ ...prev, image: reader.result }));
     };
     reader.readAsDataURL(file);
   };
 
-  // Add product
-  const addProduct = () => {
+  // ➕ ADD PRODUCT TO FIREBASE
+  const addProduct = async () => {
     if (!newProduct.name || !newProduct.price) return;
 
-    const item = {
-      id: Date.now(),
+    await addDoc(collection(db, "products"), {
       name: newProduct.name,
       price: parseFloat(newProduct.price),
       stock: parseInt(newProduct.stock || "0"),
       image: newProduct.image,
       link: newProduct.link
-    };
+    });
 
-    setProducts([...products, item]);
     setNewProduct({ name: "", price: "", stock: "", image: "", link: "" });
+
+    // reload products
+    const querySnapshot = await getDocs(collection(db, "products"));
+    const items = querySnapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setProducts(items);
   };
 
-  // Remove product
-  const removeProduct = (id) => {
-    setProducts(products.filter((p) => p.id !== id));
+  // ❌ REMOVE PRODUCT
+  const removeProduct = async (id) => {
+    await deleteDoc(doc(db, "products", id));
+    setProducts(products.filter(p => p.id !== id));
   };
 
-  // Add to cart
+  // 🛒 CART
   const addToCart = (product) => {
     setCart([...cart, product]);
   };
@@ -68,7 +96,7 @@ export default function YoYosStore() {
 
   return (
     <div style={{ background: "linear-gradient(to right, pink, purple)", minHeight: "100vh", padding: 20 }}>
-      
+
       {/* HEADER */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
@@ -122,7 +150,6 @@ export default function YoYosStore() {
             <button onClick={() => removeProduct(p.id)} style={{ marginTop: 5 }}>
               Remove
             </button>
-
           </div>
         ))}
       </div>
@@ -163,5 +190,6 @@ export default function YoYosStore() {
 
     </div>
   );
+}
 }
 
