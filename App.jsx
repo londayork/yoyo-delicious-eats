@@ -1,6 +1,6 @@
- import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
-// 🔥 Firebase imports
+// Firebase
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
 import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
@@ -12,10 +12,10 @@ const firebaseConfig = {
   projectId: "yoyo-delicious-eats",
   storageBucket: "yoyo-delicious-eats.firebasestorage.app",
   messagingSenderId: "107422339618",
-  appId: "1:107422339618:web:ab40e45ae2238241efb07b",
+  appId: "1:107422339618:web:ab40e45ae2238241efb07b"
 };
 
-// 🔥 Initialize Firebase
+// 🔥 Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -33,21 +33,21 @@ export default function YoYosStore() {
     link: ""
   });
 
-  // 🔄 LOAD PRODUCTS
-  useEffect(() => {
-    const loadProducts = async () => {
-      const querySnapshot = await getDocs(collection(db, "products"));
-      const items = querySnapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data()
-      }));
-      setProducts(items);
-    };
+  // 🔄 Load products
+  const loadProducts = async () => {
+    const snapshot = await getDocs(collection(db, "products"));
+    const items = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    setProducts(items);
+  };
 
+  useEffect(() => {
     loadProducts();
   }, []);
 
-  // 📸 IMAGE UPLOAD (REAL STORAGE)
+  // 📸 Upload image
   const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
@@ -63,7 +63,7 @@ export default function YoYosStore() {
     }));
   };
 
-  // ➕ ADD PRODUCT
+  // ➕ Add product
   const addProduct = async () => {
     if (!newProduct.name || !newProduct.price) return;
 
@@ -76,23 +76,16 @@ export default function YoYosStore() {
     });
 
     setNewProduct({ name: "", price: "", stock: "", image: "", link: "" });
-
-    // reload products
-    const querySnapshot = await getDocs(collection(db, "products"));
-    const items = querySnapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    setProducts(items);
+    loadProducts();
   };
 
-  // ❌ REMOVE PRODUCT
+  // ❌ Remove product
   const removeProduct = async (id) => {
     await deleteDoc(doc(db, "products", id));
     setProducts(products.filter(p => p.id !== id));
   };
 
-  // 🛒 CART
+  // 🛒 Cart
   const addToCart = (product) => {
     setCart([...cart, product]);
   };
@@ -109,6 +102,7 @@ export default function YoYosStore() {
           <h1 style={{ color: "white" }}>Yo-Yo's Delicious Eats</h1>
         </div>
 
+        {/* 🔐 ADMIN BUTTON WITH PASSWORD */}
         <button
           onClick={() => {
             const password = prompt("Enter admin password");
