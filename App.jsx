@@ -103,18 +103,24 @@ export default function YoYosStore() {
         </div>
 
         {/* 🔐 ADMIN BUTTON WITH PASSWORD */}
-        <button
-          onClick={() => {
-            const password = prompt("Enter admin password");
-            if (password === "yoyo123") {
-              setShowAdmin(!showAdmin);
-            } else {
-              alert("Wrong password");
-            }
-          }}
-        >
-          Admin
-        </button>
+       <button
+  onClick={() => {
+    const password = window.prompt("Enter admin password");
+    
+    if (!password) {
+      alert("Access denied");
+      return;
+    }
+
+    if (password === "yoyo123") {
+      setShowAdmin(prev => !prev);
+    } else {
+      alert("Wrong password");
+    }
+  }}
+>
+  Admin
+</button>
       </div>
 
       {/* HERO */}
