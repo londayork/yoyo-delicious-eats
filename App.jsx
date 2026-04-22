@@ -53,7 +53,6 @@ export default function YoYosStore() {
     if (!file) return;
 
     const storageRef = ref(storage, "products/" + Date.now() + "_" + file.name);
-
     await uploadBytes(storageRef, file);
     const url = await getDownloadURL(storageRef);
 
@@ -102,25 +101,27 @@ export default function YoYosStore() {
           <h1 style={{ color: "white" }}>Yo-Yo's Delicious Eats</h1>
         </div>
 
-        {/* 🔐 ADMIN BUTTON WITH PASSWORD */}
-       <button
-  onClick={() => {
-    const password = window.prompt("Enter admin password");
-    
-    if (!password) {
-      alert("Access denied");
-      return;
-    }
+        {/* 🔐 ADMIN BUTTON (TEST + PASSWORD) */}
+        <button
+          onClick={() => {
+            alert("BUTTON WORKING"); // ✅ this MUST show first
 
-    if (password === "yoyo123") {
-      setShowAdmin(prev => !prev);
-    } else {
-      alert("Wrong password");
-    }
-  }}
->
-  Admin
-</button>
+            const password = window.prompt("Enter admin password");
+
+            if (!password) {
+              alert("Access denied");
+              return;
+            }
+
+            if (password === "yoyo123") {
+              setShowAdmin(prev => !prev);
+            } else {
+              alert("Wrong password");
+            }
+          }}
+        >
+          Admin
+        </button>
       </div>
 
       {/* HERO */}
