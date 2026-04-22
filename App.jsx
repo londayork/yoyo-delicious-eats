@@ -1,10 +1,11 @@
-import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage"; import React, { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 
 // 🔥 Firebase imports
 import { initializeApp } from "firebase/app";
 import { getFirestore, collection, addDoc, getDocs, deleteDoc, doc } from "firebase/firestore";
+import { getStorage, ref, uploadBytes, getDownloadURL } from "firebase/storage";
 
-// 🔥 YOUR Firebase config (already added)
+// 🔥 Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC0bfI2ckY0QLsUwxt8dojAk4a65-0axU8",
   authDomain: "yoyo-delicious-eats.firebaseapp.com",
@@ -12,12 +13,12 @@ const firebaseConfig = {
   storageBucket: "yoyo-delicious-eats.firebasestorage.app",
   messagingSenderId: "107422339618",
   appId: "1:107422339618:web:ab40e45ae2238241efb07b",
-  measurementId: "G-PQ88RKGGHE"
 };
 
 // 🔥 Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
+const storage = getStorage(app);
 
 export default function YoYosStore() {
   const [products, setProducts] = useState([]);
@@ -32,7 +33,7 @@ export default function YoYosStore() {
     link: ""
   });
 
-  // 🔄 LOAD PRODUCTS FROM FIREBASE
+  // 🔄 LOAD PRODUCTS
   useEffect(() => {
     const loadProducts = async () => {
       const querySnapshot = await getDocs(collection(db, "products"));
@@ -46,19 +47,23 @@ export default function YoYosStore() {
     loadProducts();
   }, []);
 
-  // 📸 IMAGE UPLOAD (temporary base64 for now)
-  const handleImageUpload = (e) => {
+  // 📸 IMAGE UPLOAD (REAL STORAGE)
+  const handleImageUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setNewProduct(prev => ({ ...prev, image: reader.result }));
-    };
-    reader.readAsDataURL(file);
+    const storageRef = ref(storage, "products/" + Date.now() + "_" + file.name);
+
+    await uploadBytes(storageRef, file);
+    const url = await getDownloadURL(storageRef);
+
+    setNewProduct(prev => ({
+      ...prev,
+      image: url
+    }));
   };
 
-  // ➕ ADD PRODUCT TO FIREBASE
+  // ➕ ADD PRODUCT
   const addProduct = async () => {
     if (!newProduct.name || !newProduct.price) return;
 
@@ -191,5 +196,3 @@ export default function YoYosStore() {
     </div>
   );
 }
-}
-
