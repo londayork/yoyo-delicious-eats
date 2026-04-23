@@ -23,7 +23,7 @@ import {
   signOut
 } from "firebase/auth";
 
-// 🔥 Firebase config (keep yours)
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC0bfI2ckY0QLsUwxt8dojAk4a65-0axU8",
   authDomain: "yoyo-delicious-eats.firebaseapp.com",
@@ -47,11 +47,7 @@ export default function YoYosStore() {
   const [password, setPassword] = useState("");
 
   const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    stock: "",
-    image: "",
-    link: ""
+    name: "", price: "", stock: "", image: "", link: ""
   });
 
   useEffect(() => {
@@ -117,43 +113,41 @@ export default function YoYosStore() {
       <div style={{
         display: "flex",
         justifyContent: "space-between",
-        alignItems: "center",
-        padding: "20px 30px",
+        padding: 20,
         background: "white",
-        boxShadow: "0 4px 15px rgba(0,0,0,0.08)",
         borderRadius: "0 0 20px 20px"
       }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <img src="/logo.png" style={{
-            width: 60,
-            height: 60,
-            borderRadius: "50%",
-            boxShadow: "0 4px 10px rgba(0,0,0,0.2)"
-          }} />
-          <h2 style={{ color: "#b06ab3" }}>
-            Yo-Yo's Delicious Eats
-          </h2>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/logo.png" style={{ width: 60, borderRadius: "50%" }} />
+          <h2 style={{ color: "#b06ab3" }}>Yo-Yo's Delicious Eats</h2>
         </div>
-
         {user && <button onClick={handleLogout}>Logout</button>}
       </div>
 
       {/* HERO */}
       <div style={{
         textAlign: "center",
-        padding: "60px 20px",
+        padding: 50,
         color: "white",
         background: "linear-gradient(to right, #ff7eb3, #b06ab3)",
-        borderRadius: 20,
-        margin: 20
+        margin: 20,
+        borderRadius: 20
       }}>
         <h1>Fresh Homemade Desserts 🍰</h1>
         <p>Made with love • Delivered fresh</p>
       </div>
 
+      {/* DEALS */}
+      <div style={{ background: "white", margin: 20, padding: 20, borderRadius: 15 }}>
+        <h2 style={{ color: "#b06ab3" }}>🔥 Deals & Bundles</h2>
+        <p>🍓 6 Strawberries — $10</p>
+        <p>🍰 3 Dessert Combo — $15</p>
+        <p>🧁 Party Pack — $30</p>
+      </div>
+
       {/* LOGIN */}
       {!user && (
-        <div style={{ background: "white", padding: 20, margin: 20, borderRadius: 15 }}>
+        <div style={{ background: "white", margin: 20, padding: 20 }}>
           <h3>Admin Login</h3>
           <input placeholder="Email" onChange={e => setEmail(e.target.value)} />
           <input type="password" placeholder="Password" onChange={e => setPassword(e.target.value)} />
@@ -175,41 +169,17 @@ export default function YoYosStore() {
             overflow: "hidden",
             boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
           }}>
-            {p.image && (
-              <img src={p.image} style={{ width: "100%", height: 200, objectFit: "cover" }} />
-            )}
+            {p.image && <img src={p.image} style={{ width: "100%", height: 200, objectFit: "cover" }} />}
 
             <div style={{ padding: 15 }}>
               <h3>{p.name}</h3>
               <p style={{ color: "#ff4da6", fontWeight: "bold" }}>${p.price}</p>
 
-              <button
-                onClick={() => setCart([...cart, p])}
-                style={{
-                  width: "100%",
-                  marginTop: 10,
-                  background: "linear-gradient(to right, #ff4da6, #b06ab3)",
-                  color: "white",
-                  border: "none",
-                  padding: 12,
-                  borderRadius: 12
-                }}
-              >
-                Add to Cart 🛒
-              </button>
-
-              <button
-                onClick={() => window.location.href = p.link}
-                style={{ width: "100%", marginTop: 5 }}
-              >
-                Buy Now 💳
-              </button>
+              <button onClick={() => setCart([...cart, p])}>Add to Cart 🛒</button>
+              <button onClick={() => window.location.href = p.link}>Buy Now 💳</button>
 
               {user && (
-                <button
-                  onClick={() => deleteProduct(p.id)}
-                  style={{ background: "red", color: "white", marginTop: 5 }}
-                >
+                <button onClick={() => deleteProduct(p.id)} style={{ background: "red", color: "white" }}>
                   Delete ❌
                 </button>
               )}
@@ -219,34 +189,38 @@ export default function YoYosStore() {
       </div>
 
       {/* CART */}
-      <div style={{ background: "white", padding: 20, margin: 20, borderRadius: 15 }}>
+      <div style={{ background: "white", margin: 20, padding: 20 }}>
         <h2>🛒 Cart</h2>
-
         {cart.map((item, i) => (
           <p key={i}>{item.name} - ${item.price}</p>
         ))}
-
         <h3>Total: ${total}</h3>
+      </div>
 
-        <button onClick={() => {
-          if (!cart.length) return alert("Cart empty");
-          window.location.href = cart[0].link;
-        }}>
-          Checkout 💳
-        </button>
+      {/* ABOUT */}
+      <div style={{ background: "white", margin: 20, padding: 20 }}>
+        <h2 style={{ color: "#b06ab3" }}>Why Choose Us 💜</h2>
+        <p>✔ Fresh homemade desserts</p>
+        <p>✔ Quality ingredients</p>
+        <p>✔ Affordable & delicious</p>
+      </div>
+
+      {/* REVIEWS */}
+      <div style={{ margin: 20 }}>
+        <h2>💬 Reviews</h2>
+        <p>⭐⭐⭐⭐⭐ “Best desserts ever!”</p>
+        <p>⭐⭐⭐⭐⭐ “Fresh and delicious!”</p>
       </div>
 
       {/* ADMIN */}
       {user && (
-        <div style={{ background: "white", padding: 20, margin: 20, borderRadius: 15 }}>
+        <div style={{ background: "white", margin: 20, padding: 20 }}>
           <h2>Add Product</h2>
-
           <input placeholder="Name" onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
           <input placeholder="Price" onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
           <input placeholder="Stock" onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
           <input type="file" onChange={handleImageUpload} />
           <input placeholder="Stripe Link" onChange={e => setNewProduct({ ...newProduct, link: e.target.value })} />
-
           <button onClick={addProduct}>Add Product</button>
         </div>
       )}
