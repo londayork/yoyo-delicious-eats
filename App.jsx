@@ -23,7 +23,7 @@ import {
   signOut
 } from "firebase/auth";
 
-// 🔥 Firebase config (keep yours)
+// Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyC0bfI2ckY0QLsUwxt8dojAk4a65-0axU8",
   authDomain: "yoyo-delicious-eats.firebaseapp.com",
@@ -40,39 +40,25 @@ const auth = getAuth(app);
 
 export default function YoYosStore() {
   const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const [customerName, setCustomerName] = useState("");
-  const [customerEmail, setCustomerEmail] = useState("");
-
   const [newProduct, setNewProduct] = useState({
-    name: "",
-    price: "",
-    stock: "",
-    image: "",
-    link: ""
+    name: "", price: "", stock: "", image: "", link: ""
   });
 
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, (u) => setUser(u));
     loadProducts();
-    loadOrders();
     return () => unsub();
   }, []);
 
   const loadProducts = async () => {
     const snap = await getDocs(collection(db, "products"));
     setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
-  };
-
-  const loadOrders = async () => {
-    const snap = await getDocs(collection(db, "orders"));
-    setOrders(snap.docs.map(d => d.data()));
   };
 
   const handleLogin = async () => {
@@ -97,7 +83,7 @@ export default function YoYosStore() {
   };
 
   const addProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return;
+    if (!newProduct.name || !newProduct.price) return alert("Enter name & price");
 
     await addDoc(collection(db, "products"), {
       ...newProduct,
@@ -114,51 +100,49 @@ export default function YoYosStore() {
     loadProducts();
   };
 
-  const placeOrder = async () => {
-    if (!customerName || !customerEmail) return alert("Enter info");
-    if (!cart.length) return alert("Cart empty");
-
-    const total = cart.reduce((sum, i) => sum + i.price, 0);
-
-    await addDoc(collection(db, "orders"), {
-      name: customerName,
-      email: customerEmail,
-      items: cart,
-      total,
-      date: new Date().toLocaleString()
-    });
-
-    alert("Order placed!");
-
-    window.location.href = cart[0].link;
-
-    setCart([]);
-    setCustomerName("");
-    setCustomerEmail("");
-    loadOrders();
-  };
-
   const total = cart.reduce((sum, i) => sum + i.price, 0).toFixed(2);
 
   return (
     <div style={{
       minHeight: "100vh",
       background: "linear-gradient(135deg, #ffe4ec, #f9d6ff)",
-      fontFamily: "sans-serif"
+      fontFamily: "Poppins, sans-serif"
     }}>
 
       {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: 20, background: "white" }}>
-        <div style={{ display: "flex", gap: 10 }}>
-          <img src="/logo.png" style={{ width: 50, borderRadius: "50%" }} />
+      <div style={{
+        display: "flex",
+        justifyContent: "space-between",
+        padding: 20,
+        background: "white",
+        borderRadius: "0 0 20px 20px"
+      }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/logo.png" style={{ width: 60, borderRadius: "50%" }} />
           <h2 style={{ color: "#b06ab3" }}>Yo-Yo's Delicious Eats</h2>
         </div>
         {user && <button onClick={handleLogout}>Logout</button>}
       </div>
 
       {/* HERO */}
-      <div style={{ textAlign: "center", padding: 40, background: "pink", color: "white" }}>
+      <div style={{
+        textAlign: "center",
+        padding: 50,
+        color: "white",
+        background: "linear-gradient(to right, #ff7eb3, #b06ab3)",
+        margin: 20,
+        borderRadius: 20
+      }}>
         <h1>Fresh Homemade Desserts 🍰</h1>
+        <p>Made with love • Delivered fresh</p>
+      </div>
+
+      {/* DEALS */}
+      <div style={{ background: "white", margin: 20, padding: 20, borderRadius: 15 }}>
+        <h2 style={{ color: "#b06ab3" }}>🔥 Deals & Bundles</h2>
+        <p>🍓 6 Strawberries — $10</p>
+        <p>🍰 3 Dessert Combo — $15</p>
+        <p>🧁 Party Pack — $30</p>
       </div>
 
       {/* LOGIN */}
@@ -172,46 +156,61 @@ export default function YoYosStore() {
       )}
 
       {/* PRODUCTS */}
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))", gap: 20, padding: 20 }}>
+      <div style={{
+        display: "grid",
+        gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
+        gap: 25,
+        padding: 30
+      }}>
         {products.map(p => (
-          <div key={p.id} style={{ background: "white", padding: 15 }}>
-            {p.image && <img src={p.image} style={{ width: "100%" }} />}
-            <h3>{p.name}</h3>
-            <p>${p.price}</p>
+          <div key={p.id} style={{
+            background: "white",
+            borderRadius: 20,
+            overflow: "hidden",
+            boxShadow: "0 10px 25px rgba(0,0,0,0.1)"
+          }}>
+            {p.image && <img src={p.image} style={{ width: "100%", height: 200, objectFit: "cover" }} />}
 
-            <button onClick={() => setCart([...cart, p])}>Add to Cart</button>
-            <button onClick={() => window.location.href = p.link}>Buy</button>
+            <div style={{ padding: 15 }}>
+              <h3>{p.name}</h3>
+              <p style={{ color: "#ff4da6", fontWeight: "bold" }}>${p.price}</p>
 
-            {user && <button onClick={() => deleteProduct(p.id)}>Delete</button>}
+              <button onClick={() => setCart([...cart, p])}>Add to Cart 🛒</button>
+              <button onClick={() => window.location.href = p.link}>Buy Now 💳</button>
+
+              {user && (
+                <button onClick={() => deleteProduct(p.id)} style={{ background: "red", color: "white" }}>
+                  Delete ❌
+                </button>
+              )}
+            </div>
           </div>
         ))}
       </div>
 
       {/* CART */}
       <div style={{ background: "white", margin: 20, padding: 20 }}>
-        <h2>Cart</h2>
-        {cart.map((i, idx) => <p key={idx}>{i.name} - ${i.price}</p>)}
+        <h2>🛒 Cart</h2>
+        {cart.map((item, i) => (
+          <p key={i}>{item.name} - ${item.price}</p>
+        ))}
         <h3>Total: ${total}</h3>
-
-        <input placeholder="Name" value={customerName} onChange={e => setCustomerName(e.target.value)} />
-        <input placeholder="Email" value={customerEmail} onChange={e => setCustomerEmail(e.target.value)} />
-
-        <button onClick={placeOrder}>Checkout 💳</button>
       </div>
 
-      {/* ORDERS */}
-      {user && (
-        <div style={{ background: "white", margin: 20, padding: 20 }}>
-          <h2>Orders</h2>
-          {orders.map((o, i) => (
-            <div key={i}>
-              <p>{o.name} ({o.email})</p>
-              <p>${o.total}</p>
-              <hr />
-            </div>
-          ))}
-        </div>
-      )}
+      {/* ABOUT */}
+      <div style={{ background: "white", margin: 20, padding: 20 }}>
+        <h2 style={{ color: "#b06ab3" }}>Why Choose Us 💜</h2>
+        <p>✔ Fresh homemade desserts</p>
+        <p>✔ Quality ingredients</p>
+        <p>✔ Affordable & delicious</p>
+      </div>
+
+      {/* REVIEWS */}
+      <div style={{ margin: 20 }}>
+        <h2>💬 Reviews</h2>
+        <p>⭐⭐⭐⭐⭐ “Best desserts ever!”</p>
+        <p>⭐⭐⭐⭐⭐ “Fresh and delicious!”</p>
+      </div>
 
       {/* ADMIN */}
       {user && (
@@ -219,9 +218,10 @@ export default function YoYosStore() {
           <h2>Add Product</h2>
           <input placeholder="Name" onChange={e => setNewProduct({ ...newProduct, name: e.target.value })} />
           <input placeholder="Price" onChange={e => setNewProduct({ ...newProduct, price: e.target.value })} />
+          <input placeholder="Stock" onChange={e => setNewProduct({ ...newProduct, stock: e.target.value })} />
           <input type="file" onChange={handleImageUpload} />
           <input placeholder="Stripe Link" onChange={e => setNewProduct({ ...newProduct, link: e.target.value })} />
-          <button onClick={addProduct}>Add</button>
+          <button onClick={addProduct}>Add Product</button>
         </div>
       )}
     </div>
