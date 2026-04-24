@@ -42,6 +42,13 @@ export default function YoYosStore() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
+export default function YoYosStore() {
+
+  const [products, setProducts] = useState([]);
+  const [user, setUser] = useState(null);
+
+  // 👉 ADD IT RIGHT HERE
+  const [cart, setCart] = useState([]);
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -174,8 +181,9 @@ export default function YoYosStore() {
             <div style={{ padding: 15 }}>
               <h3>{p.name}</h3>
               <p style={{ color: "#ff4da6", fontWeight: "bold" }}>${p.price}</p>
-
-              <button onClick={() => setCart([...cart, p])}>Add to Cart 🛒</button>
+<button onClick={() => setCart((prev) => [...prev, p])}>
+  Add to Cart 🛒
+</button>
               <button onClick={() => window.location.href = p.link}>Buy Now 💳</button>
 
               {user && (
@@ -226,4 +234,14 @@ export default function YoYosStore() {
       )}
     </div>
   );
-}
+}<div>
+  <h2>🛒 Cart</h2>
+
+  {cart.length === 0 && <p>No items yet</p>}
+
+  {cart.map((item, i) => (
+    <p key={i}>
+      {item.name} - ${item.price}
+    </p>
+  ))}
+</div>
