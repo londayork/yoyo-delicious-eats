@@ -42,14 +42,6 @@ export default function YoYosStore() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
-export default function YoYosStore() {
-
-  const [products, setProducts] = useState([]);
-  const [user, setUser] = useState(null);
-
-  // 👉 ADD IT RIGHT HERE
-  const [cart, setCart] = useState([]);
-
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
