@@ -219,9 +219,7 @@ export default function YoYosStore() {
 
         <button
   onClick={async () => {
-    if (cart.length < 3) {
-      return alert("Minimum 3 items required 🚚");
-    }
+    
 
     if (!customerEmail) {
       return alert("Enter email");
