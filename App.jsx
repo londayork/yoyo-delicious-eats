@@ -242,46 +242,53 @@ const [customerEmail, setCustomerEmail] = useState("");
       border: "1px solid #ccc"
     }}
   />
+{/* CHECKOUT */}
+<button
+  onClick={async () => {
+    if (cart.length < 3) {
+      return alert("Minimum 3 items required for checkout 🚚");
+    }
 
-  {/* CHECKOUT */}
-  <button
-    onClick={async () => {
-      if (cart.length < 3) {
-        return alert("Minimum 3 items required for checkout 🚚");
-      }
+    if (!customerEmail) return alert("Enter email");
 
-      if (!customerEmail) return alert("Enter email");
+    const total = cart.reduce((sum, i) => sum + i.price, 0);
 
-      const total = cart.reduce((sum, i) => sum + i.price, 0);
+    await addDoc(collection(db, "orders"), {
+      email: customerEmail,
+      items: cart,
+      total,
+      date: new Date().toLocaleString(),
+      status: "Pending"
+    });
 
-      await addDoc(collection(db, "orders"), {
-        email: customerEmail,
-        items: cart,
-        total,
-        date: new Date().toLocaleString(),
-        status: "Pending" // ✅ NEW
-      });
+    alert("Order saved! 📦");
 
-      alert("Order saved! 📦");
+    // 🔥 REAL MULTI ITEM CHECKOUT
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ items: cart })
+    });
 
-      // ⚠️ MULTI ITEM WARNING
-      alert("You will complete payment for one item at a time 💳");
+    const data = await res.json();
 
-      window.location.href = cart[0].link;
-    }}
-    style={{
-      marginTop: 10,
-      width: "100%",
-      padding: 12,
-      background: "#ff4da6",
-      color: "white",
-      border: "none",
-      borderRadius: 10,
-      fontWeight: "bold"
-    }}
-  >
-    Checkout 💳
-  </button>
+    window.location.href = data.url;
+  }}
+  style={{
+    marginTop: 10,
+    width: "100%",
+    padding: 12,
+    background: "#ff4da6",
+    color: "white",
+    border: "none",
+    borderRadius: 10,
+    fontWeight: "bold"
+  }}
+>
+  Checkout 💳
+</button>
 
 </div>
 
