@@ -345,3 +345,9 @@ export default function YoYosStore() {
 >
   Checkout 💳
 </button>
+      </div>   {/* closes CART section if needed */}
+
+      </div>   {/* closes MAIN WRAPPER */}
+
+  );
+}
