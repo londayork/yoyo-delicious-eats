@@ -251,19 +251,18 @@ const [customerEmail, setCustomerEmail] = useState("");
 
     if (!customerEmail) return alert("Enter email");
 
-    const total = cart.reduce((sum, i) => sum + i.price, 0);
+    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
     await addDoc(collection(db, "orders"), {
-  email: customerEmail,
-  items: cart,
-  total: totalValue,
-  date: new Date().toLocaleString(),
-  status: "Pending"
-});
+      email: customerEmail,
+      items: cart,
+      total: totalValue,
+      date: new Date().toLocaleString(),
+      status: "Pending"
+    });
 
     alert("Order saved! 📦");
 
-    // 🔥 REAL MULTI ITEM CHECKOUT
     const res = await fetch("/api/create-checkout-session", {
       method: "POST",
       headers: {
@@ -275,16 +274,6 @@ const [customerEmail, setCustomerEmail] = useState("");
     const data = await res.json();
 
     window.location.href = data.url;
-  }}
-  style={{
-    marginTop: 10,
-    width: "100%",
-    padding: 12,
-    background: "#ff4da6",
-    color: "white",
-    border: "none",
-    borderRadius: 10,
-    fontWeight: "bold"
   }}
 >
   Checkout 💳
