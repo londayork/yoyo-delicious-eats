@@ -252,7 +252,7 @@ export default function YoYosStore() {
     // 👉 Redirect to payment page
     window.location.href = data.url;
   }}
->
+>      
   Checkout 💳
 </button>
       </div>
@@ -282,24 +282,66 @@ export default function YoYosStore() {
         />
 
         <button
-          onClick={async () => {
-            const snap = await getDocs(collection(db, "orders"));
-            const results = snap.docs.map(doc => doc.data());
-            setOrders(results.filter(o => o.email === customerEmail));
-          }}
-        >
-          Track
-        </button>
+  onClick={async () => {
+    console.log("🛒 Cart:", cart);
+    console.log("📧 Email:", customerEmail);
 
-        {orders.map((o, i) => (
-          <div key={i}>
-            <p>Total: ${o.total}</p>
-            <p>{o.date}</p>
-            <p>{o.status}</p>
-          </div>
-        ))}
-      </div>
+    if (cart.length < 3) {
+      alert("Minimum 3 items required 🚚");
+      console.log("❌ Not enough items");
+      return;
+    }
 
-    </div>
-  );
-}
+    if (!customerEmail) {
+      alert("Enter email");
+      console.log("❌ No email entered");
+      return;
+    }
+
+    try {
+      const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
+      console.log("💰 Total:", totalValue);
+
+      // ✅ Save order to Firebase
+      await addDoc(collection(db, "orders"), {
+        email: customerEmail,
+        items: cart,
+        total: totalValue,
+        date: new Date().toLocaleString(),
+        status: "Pending"
+      });
+
+      console.log("✅ Order saved");
+
+      // 🔥 Call Stripe API
+      console.log("🚀 Calling Stripe API...");
+      const res = await fetch("/api/create-checkout-session", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ items: cart })
+      });
+
+      console.log("📡 Response status:", res.status);
+
+      const data = await res.json();
+      console.log("💳 Stripe response:", data);
+
+      if (!data.url) {
+        alert("Stripe error — no URL returned");
+        console.log("❌ No Stripe URL");
+        return;
+      }
+
+      // ✅ Redirect to Stripe
+      window.location.href = data.url;
+
+    } catch (err) {
+      console.error("🔥 Checkout error:", err);
+      alert("Something went wrong — check console");
+    }
+  }}
+>
+  Checkout 💳
+</button>
