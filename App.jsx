@@ -8,7 +8,8 @@ import {
   addDoc,
   getDocs,
   deleteDoc,
-  doc
+  doc,
+  updateDoc
 } from "firebase/firestore";
 import {
   getStorage,
@@ -23,9 +24,8 @@ import {
   signOut
 } from "firebase/auth";
 
-// 🔥 YOUR FIREBASE CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyC0bfI2ckY0QLsUwxt8dojAk4a65-0axU8",
+  apiKey: "AIzaSyC0bf...",
   authDomain: "yoyo-delicious-eats.firebaseapp.com",
   projectId: "yoyo-delicious-eats",
   storageBucket: "yoyo-delicious-eats.firebasestorage.app",
@@ -33,7 +33,6 @@ const firebaseConfig = {
   appId: "1:107422339618:web:ab40e45ae2238241efb07b"
 };
 
-// Init Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const storage = getStorage(app);
@@ -42,7 +41,11 @@ const auth = getAuth(app);
 export default function YoYosStore() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
+  const [orders, setOrders] = useState([]);
   const [user, setUser] = useState(null);
+
+  const [customerName, setCustomerName] = useState("");
+  const [customerEmail, setCustomerEmail] = useState("");
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -63,42 +66,16 @@ export default function YoYosStore() {
 
   const loadProducts = async () => {
     const snap = await getDocs(collection(db, "products"));
-    setProducts(snap.docs.map((d) => ({ id: d.id, ...d.data() })));
+    setProducts(snap.docs.map(d => ({ id: d.id, ...d.data() })));
   };
 
-  const handleLogin = async () => {
-    try {
-      await signInWithEmailAndPassword(auth, email.trim(), password);
-    } catch (err) {
-      alert(err.message);
-    }
-  };
-
-  const handleLogout = () => signOut(auth);
-
-  const handleImageUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    const storageRef = ref(storage, "products/" + Date.now() + "_" + file.name);
-    await uploadBytes(storageRef, file);
-    const url = await getDownloadURL(storageRef);
-
-    setNewProduct((prev) => ({ ...prev, image: url }));
-  };
-
+  // ADD PRODUCT
   const addProduct = async () => {
-    if (!newProduct.name || !newProduct.price) return alert("Enter name & price");
-
     await addDoc(collection(db, "products"), {
-      name: newProduct.name,
+      ...newProduct,
       price: parseFloat(newProduct.price),
-      stock: parseInt(newProduct.stock || "0"),
-      image: newProduct.image,
-      link: newProduct.link
+      stock: parseInt(newProduct.stock || "0")
     });
-
-    setNewProduct({ name: "", price: "", stock: "", image: "", link: "" });
     loadProducts();
   };
 
@@ -107,145 +84,112 @@ export default function YoYosStore() {
     loadProducts();
   };
 
+  // PLACE ORDER
+  const placeOrder = async () => {
+    if (!customerName || !customerEmail) return alert("Enter info");
+    if (!cart.length) return alert("Cart empty");
+
+    const total = cart.reduce((sum, i) => sum + i.price, 0);
+
+    await addDoc(collection(db, "orders"), {
+      name: customerName,
+      email: customerEmail,
+      items: cart,
+      total,
+      date: new Date().toLocaleString(),
+      status: "Pending",
+      trackingNumber: ""
+    });
+
+    alert("Order placed!");
+    setCart([]);
+  };
+
+  // TRACK ORDER
+  const trackOrders = async () => {
+    const snap = await getDocs(collection(db, "orders"));
+    const results = snap.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    setOrders(results.filter(o => o.email === customerEmail));
+  };
+
   const total = cart.reduce((sum, i) => sum + i.price, 0).toFixed(2);
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #ffe4ec, #f9d6ff)",
-      fontFamily: "sans-serif"
-    }}>
+    <div style={{ padding: 20 }}>
 
-      {/* HEADER */}
-      <div style={{
-        display: "flex",
-        justifyContent: "space-between",
-        padding: 20,
-        background: "white"
-      }}>
-        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-          <img src="/logo.png" style={{ width: 50, borderRadius: "50%" }} />
-          <h2 style={{ color: "#b06ab3" }}>Yo-Yo's Delicious Eats</h2>
-        </div>
-
-        {user && <button onClick={handleLogout}>Logout</button>}
-      </div>
-
-      {/* HERO */}
-      <div style={{
-        textAlign: "center",
-        padding: 50,
-        background: "linear-gradient(to right, #ff7eb3, #b06ab3)",
-        color: "white",
-        margin: 20,
-        borderRadius: 20
-      }}>
-        <h1>Fresh Homemade Desserts 🍰</h1>
-        <p>Made with love • Baked fresh daily 💜</p>
-      </div>
-
-      {/* DEALS */}
-      <div style={{
-        background: "white",
-        margin: 20,
-        padding: 20,
-        borderRadius: 15
-      }}>
-        <h2 style={{ color: "#b06ab3" }}>🔥 Weekly Deals</h2>
-        <p>🍓 Chocolate Strawberries (6) — $10</p>
-        <p>🍰 3 Dessert Combo — $15</p>
-        <p>🧁 Party Pack (10 items) — $30</p>
-      </div>
-
-      {/* SHIPPING */}
-      <div style={{
-        background: "white",
-        margin: 20,
-        padding: 15,
-        borderRadius: 12,
-        borderLeft: "5px solid #ff4da6"
-      }}>
-        <h3 style={{ color: "#b06ab3" }}>🚚 Shipping Policy</h3>
-        <p>Small items require a minimum of <strong>3 or more items</strong> for shipping.</p>
-      </div>
-
-      {/* LOGIN */}
-      {!user && (
-        <div style={{ background: "white", padding: 20, margin: 20 }}>
-          <h3>Admin Login</h3>
-          <input placeholder="Email" onChange={(e) => setEmail(e.target.value)} />
-          <input type="password" placeholder="Password" onChange={(e) => setPassword(e.target.value)} />
-          <button onClick={handleLogin}>Login</button>
-        </div>
-      )}
+      <h1>🍰 Yo-Yo's Delicious Eats</h1>
 
       {/* PRODUCTS */}
-      <div style={{
-        display: "grid",
-        gridTemplateColumns: "repeat(auto-fit, minmax(250px,1fr))",
-        gap: 20,
-        padding: 20
-      }}>
-        {products.map((p) => (
-          <div key={p.id} style={{ background: "white", padding: 15, borderRadius: 15 }}>
-            {p.image && (
-              <img src={p.image} style={{ width: "100%", height: 200, objectFit: "cover" }} />
-            )}
+      {products.map(p => (
+        <div key={p.id}>
+          <h3>{p.name}</h3>
+          <p>${p.price}</p>
 
-            <h3>{p.name}</h3>
-            <p>${p.price}</p>
+          <button onClick={() => setCart(prev => [...prev, p])}>
+            Add to Cart 🛒
+          </button>
 
-            <button onClick={() => setCart((prev) => [...prev, p])}>
-              Add to Cart 🛒
-            </button>
+          <button onClick={() => window.location.href = p.link}>
+            Buy Now 💳
+          </button>
 
-            <button onClick={() => window.location.href = p.link}>
-              Buy Now 💳
-            </button>
-
-            {user && (
-              <button onClick={() => deleteProduct(p.id)} style={{ background: "red", color: "white" }}>
-                Delete ❌
-              </button>
-            )}
-          </div>
-        ))}
-      </div>
+          {user && <button onClick={() => deleteProduct(p.id)}>Delete</button>}
+        </div>
+      ))}
 
       {/* CART */}
-      <div style={{ background: "white", padding: 20, margin: 20, borderRadius: 15 }}>
-        <h2>🛒 Cart</h2>
+      <h2>Cart</h2>
+      {cart.map((item, i) => (
+        <p key={i}>{item.name} - ${item.price}</p>
+      ))}
+      <h3>Total: ${total}</h3>
 
-        {cart.map((item, i) => (
-          <p key={i}>{item.name} - ${item.price}</p>
-        ))}
+      <input placeholder="Name" onChange={e => setCustomerName(e.target.value)} />
+      <input placeholder="Email" onChange={e => setCustomerEmail(e.target.value)} />
 
-        <h3>Total: ${total}</h3>
+      <button onClick={placeOrder}>Place Order 📦</button>
 
-        <button onClick={() => {
-          if (!cart.length) return alert("Cart empty");
-          window.location.href = cart[0].link;
-        }}>
-          Checkout 💳
-        </button>
-      </div>
+      {/* TRACKING */}
+      <h2>📦 Track Order</h2>
+      <input placeholder="Enter email" onChange={e => setCustomerEmail(e.target.value)} />
+      <button onClick={trackOrders}>Track</button>
 
-      {/* ADMIN */}
-      {user && (
-        <div style={{ background: "white", padding: 20, margin: 20 }}>
-          <h2>Add Product</h2>
+      {orders.map((o, i) => (
+        <div key={i} style={{ border: "1px solid #ddd", margin: 10, padding: 10 }}>
+          <p><strong>Name:</strong> {o.name}</p>
+          <p><strong>Total:</strong> ${o.total}</p>
+          <p><strong>Status:</strong> {o.status}</p>
+          <p><strong>Tracking #:</strong> {o.trackingNumber || "Not assigned"}</p>
 
-          <input placeholder="Name" onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })} />
-          <input placeholder="Price" onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })} />
-          <input placeholder="Stock" onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })} />
+          {/* PROGRESS BAR */}
+          <div style={{ background: "#eee", height: 10 }}>
+            <div style={{
+              width: o.status === "Delivered" ? "100%" : "50%",
+              height: "100%",
+              background: "purple"
+            }} />
+          </div>
 
-          <input type="file" onChange={handleImageUpload} />
-
-          <input placeholder="Stripe Link" onChange={(e) => setNewProduct({ ...newProduct, link: e.target.value })} />
-
-          <button onClick={addProduct}>Add Product</button>
+          {/* ADMIN CONTROLS */}
+          {user && (
+            <>
+              <button onClick={async () => {
+                await updateDoc(doc(db, "orders", o.id), {
+                  status: "Delivered"
+                });
+                alert("Updated");
+                trackOrders();
+              }}>
+                Mark Delivered
+              </button>
+            </>
+          )}
         </div>
-      )}
+      ))}
 
     </div>
   );
