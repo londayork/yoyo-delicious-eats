@@ -237,7 +237,7 @@ export default function YoYosStore() {
     });
 
     // 🔥 STRIPE CHECKOUT
-    const res = await fetch("/api/create-checkout-session", {
+    const res = await fetch("/api", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
