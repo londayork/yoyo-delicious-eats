@@ -42,7 +42,8 @@ export default function YoYosStore() {
   const [products, setProducts] = useState([]);
   const [cart, setCart] = useState([]);
   const [user, setUser] = useState(null);
-
+const [orders, setOrders] = useState([]);
+const [customerEmail, setCustomerEmail] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
@@ -207,17 +208,84 @@ export default function YoYosStore() {
           </div>
         ))}
       </div>
+{/* CART */}
+<div style={{
+  background: "white",
+  padding: 20,
+  margin: 20,
+  borderRadius: 15,
+  boxShadow: "0 4px 10px rgba(0,0,0,0.1)"
+}}>
 
-      {/* CART */}
-      <div style={{ background: "white", padding: 20, margin: 20 }}>
-        <h2>🛒 Cart</h2>
+  <h2 style={{ color: "#b06ab3" }}>🛒 Your Cart</h2>
 
-        {cart.map((item, i) => (
-          <p key={i}>{item.name} - ${item.price}</p>
-        ))}
+  {cart.length === 0 && <p>No items yet</p>}
 
-        <h3>Total: ${total}</h3>
-      </div>
+  {cart.map((item, i) => (
+    <p key={i}>
+      {item.name} - ${item.price}
+    </p>
+  ))}
+
+  <h3>Total: ${total}</h3>
+
+  {/* EMAIL */}
+  <input
+    placeholder="Enter your email for tracking"
+    value={customerEmail}
+    onChange={(e) => setCustomerEmail(e.target.value)}
+    style={{
+      marginTop: 10,
+      padding: 10,
+      width: "100%",
+      borderRadius: 8,
+      border: "1px solid #ccc"
+    }}
+  />
+
+  {/* CHECKOUT */}
+  <button
+    onClick={async () => {
+      if (cart.length < 3) {
+        return alert("Minimum 3 items required for checkout 🚚");
+      }
+
+      if (!customerEmail) return alert("Enter email");
+
+      const total = cart.reduce((sum, i) => sum + i.price, 0);
+
+      await addDoc(collection(db, "orders"), {
+        email: customerEmail,
+        items: cart,
+        total,
+        date: new Date().toLocaleString(),
+        status: "Pending" // ✅ NEW
+      });
+
+      alert("Order saved! 📦");
+
+      // ⚠️ MULTI ITEM WARNING
+      alert("You will complete payment for one item at a time 💳");
+
+      window.location.href = cart[0].link;
+    }}
+    style={{
+      marginTop: 10,
+      width: "100%",
+      padding: 12,
+      background: "#ff4da6",
+      color: "white",
+      border: "none",
+      borderRadius: 10,
+      fontWeight: "bold"
+    }}
+  >
+    Checkout 💳
+  </button>
+
+</div>
+
+</div>
 
       {/* ADMIN */}
       {user && (
@@ -229,7 +297,42 @@ export default function YoYosStore() {
           <button onClick={addProduct}>Add Product</button>
         </div>
       )}
+{/* TRACK ORDER */}
+<div style={{ background: "white", margin: 20, padding: 20 }}>
+  <h2>📦 Track Your Order</h2>
 
+  <input
+    placeholder="Enter your email"
+    onChange={(e) => setCustomerEmail(e.target.value)}
+    style={{ padding: 8, width: "100%", marginBottom: 10 }}
+  />
+
+  <button
+    onClick={async () => {
+      const snap = await getDocs(collection(db, "orders"));
+      const results = snap.docs.map(doc => ({
+  id: doc.id,
+  ...doc.data()
+}));
+      const filtered = results.filter(o => o.email === customerEmail);
+
+      if (!filtered.length) {
+        alert("No orders found");
+      } else {
+        setOrders(filtered);
+      }
+    }}
+  >
+    Track Order 🔍
+  </button>
+{orders.map((o, i) => (
+  <div key={i} style={{ marginTop: 10, borderTop: "1px solid #eee", paddingTop: 10 }}>
+    <p><strong>Total:</strong> ${o.total}</p>
+    <p><strong>Date:</strong> {o.date}</p>
+  </div>
+))}
+ 
+</div>
     </div>
   );
 }
