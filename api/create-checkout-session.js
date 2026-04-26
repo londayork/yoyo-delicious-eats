@@ -1,3 +1,9 @@
+export const config = {
+  api: {
+    bodyParser: true
+  }
+};
+
 export default async function handler(req, res) {
   try {
     const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
