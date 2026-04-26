@@ -113,12 +113,68 @@ export default function YoYosStore() {
   return (
     <div style={{ minHeight: "100vh", background: "#ffe4ec" }}>
 
-      {/* HEADER */}
-      <div style={{ display: "flex", justifyContent: "space-between", padding: 20, background: "white" }}>
-        <h2>Yo-Yo's Delicious Eats</h2>
-        {user && <button onClick={handleLogout}>Logout</button>}
-      </div>
+     {/* HEADER */}
+<div style={{
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  padding: 20,
+  background: "white"
+}}>
+  <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+    <img
+      src="/logo.png"
+      alt="logo"
+      style={{ width: 60, borderRadius: "50%" }}
+    />
+    <h2 style={{ color: "#b06ab3" }}>
+      Yo-Yo's Delicious Eats
+    </h2>
+  </div>
 
+  {user && <button onClick={handleLogout}>Logout</button>}
+</div>
+{/* HERO BANNER */}
+<div style={{
+  textAlign: "center",
+  padding: 50,
+  background: "linear-gradient(to right, #ff7eb3, #b06ab3)",
+  color: "white",
+  margin: 20,
+  borderRadius: 20
+}}>
+  <h1>Fresh Homemade Desserts 🍰</h1>
+  <p>Made with love • Baked fresh daily 💜</p>
+</div>
+      {/* WEEKLY DEALS */}
+<div style={{
+  background: "white",
+  margin: 20,
+  padding: 20,
+  borderRadius: 15
+}}>
+  <h2 style={{ color: "#b06ab3" }}>🔥 Weekly Specials</h2>
+
+  <p>🍓 Chocolate Covered Strawberries (6) — $10</p>
+  <p>🍰 Dessert Combo Box — $15</p>
+  <p>🧁 Party Pack — $30</p>
+</div>
+      {/* SHIPPING POLICY */}
+<div style={{
+  background: "white",
+  margin: 20,
+  padding: 15,
+  borderRadius: 12,
+  borderLeft: "5px solid #ff4da6"
+}}>
+  <p style={{ fontWeight: "bold" }}>
+    🚚 Shipping Policy:
+  </p>
+
+  <p>
+    Small items require a minimum of 3 items to qualify for shipping.
+  </p>
+</div>
       {/* LOGIN */}
       {!user && (
         <div style={{ padding: 20 }}>
