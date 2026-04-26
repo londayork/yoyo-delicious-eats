@@ -292,8 +292,6 @@ const [customerEmail, setCustomerEmail] = useState("");
 
 </div>
 
-</div>
-
       {/* ADMIN */}
       {user && (
         <div style={{ background: "white", padding: 20, margin: 20 }}>
