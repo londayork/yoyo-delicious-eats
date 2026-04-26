@@ -218,22 +218,43 @@ export default function YoYosStore() {
         />
 
         <button
-          onClick={async () => {
-            if (cart.length < 3) return alert("Minimum 3 items required");
+  onClick={async () => {
+    if (cart.length < 3) {
+      return alert("Minimum 3 items required 🚚");
+    }
 
-            await addDoc(collection(db, "orders"), {
-              email: customerEmail,
-              items: cart,
-              total: totalValue,
-              date: new Date().toLocaleString(),
-              status: "Pending"
-            });
+    if (!customerEmail) {
+      return alert("Enter email");
+    }
 
-            alert("Order saved!");
-          }}
-        >
-          Checkout
-        </button>
+    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
+
+    // Save order
+    await addDoc(collection(db, "orders"), {
+      email: customerEmail,
+      items: cart,
+      total: totalValue,
+      date: new Date().toLocaleString(),
+      status: "Pending"
+    });
+
+    // 🔥 STRIPE CHECKOUT
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ items: cart })
+    });
+
+    const data = await res.json();
+
+    // 👉 Redirect to payment page
+    window.location.href = data.url;
+  }}
+>
+  Checkout 💳
+</button>
       </div>
 
       {/* ADMIN */}
