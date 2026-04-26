@@ -14,9 +14,7 @@ export default async function handler(req, res) {
       line_items: items.map(item => ({
         price_data: {
           currency: "usd",
-          product_data: {
-            name: item.name
-          },
+          product_data: { name: item.name },
           unit_amount: Math.round(item.price * 100)
         },
         quantity: 1
