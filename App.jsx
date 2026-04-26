@@ -107,7 +107,7 @@ const [customerEmail, setCustomerEmail] = useState("");
     loadProducts();
   };
 
-  const total = cart.reduce((sum, i) => sum + i.price, 0).toFixed(2);
+  const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
   return (
     <div style={{
@@ -254,12 +254,12 @@ const [customerEmail, setCustomerEmail] = useState("");
     const total = cart.reduce((sum, i) => sum + i.price, 0);
 
     await addDoc(collection(db, "orders"), {
-      email: customerEmail,
-      items: cart,
-      total,
-      date: new Date().toLocaleString(),
-      status: "Pending"
-    });
+  email: customerEmail,
+  items: cart,
+  total: totalValue,
+  date: new Date().toLocaleString(),
+  status: "Pending"
+});
 
     alert("Order saved! 📦");
 
