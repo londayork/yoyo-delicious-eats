@@ -237,7 +237,7 @@ export default function YoYosStore() {
     });
 
     // 🔥 STRIPE CHECKOUT
-    const res = await fetch("/api/checkout")
+    const res = await fetch("/api/checkout", {
       method: "POST",
       headers: {
         "Content-Type": "application/json"
@@ -247,8 +247,16 @@ export default function YoYosStore() {
 
     const data = await res.json();
 
+console.log("FULL RESPONSE:", data);
+
     // 👉 Redirect to payment page
-    window.location.href = data.url;
+    if (!data.url) {
+  alert("Stripe error: " + (data.error || "No URL returned"));
+  console.log("ERROR RESPONSE:", data);
+  return;
+}
+
+window.location.href = data.url;
   }}
 >      
   Checkout 💳
@@ -280,25 +288,21 @@ export default function YoYosStore() {
         />
 
         <button
-  onClick={async () => {
-    console.log("🛒 Cart:", cart);
-    console.log("📧 Email:", customerEmail);
+ onClick={async () => {
+  console.log("🛒 Cart:", cart);
+  console.log("📧 Email:", customerEmail);
 
-    if (cart.length < 3) {
-      alert("Minimum 3 items required 🚚");
-      console.log("❌ Not enough items");
-      return;
-    }
+  if (!customerEmail) {
+    alert("Enter email");
+    console.log("❌ No email entered");
+    return;
+  }
 
-    if (!customerEmail) {
-      alert("Enter email");
-      console.log("❌ No email entered");
-      return;
-    }
+  try {
+    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
+    console.log("💰 Total:", totalValue);
 
-    try {
-      const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
-      console.log("💰 Total:", totalValue);
+    // continue checkout...
 
       // ✅ Save order to Firebase
       await addDoc(collection(db, "orders"), {
