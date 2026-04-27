@@ -249,6 +249,7 @@ export default function YoYosStore() {
       total: totalValue,
       date: new Date().toLocaleString(),
       status: "Pending"
+      trackingNumber: ""
     });
 
     // 🔥 STRIPE CHECKOUT
@@ -338,12 +339,32 @@ window.location.href = data.url;
   </button>
 
   {/* SHOW ORDERS */}
-  {orders.map((o, i) => (
-    <div key={i}>
-      <p>Status: {o.status}</p>
-      <p>Total: ${o.total}</p>
-    </div>
-  ))}
+{orders.map((o, i) => (
+  <div key={i} style={{
+    background: "#fff0f5",
+    padding: 15,
+    marginTop: 10,
+    borderRadius: 10
+  }}>
+    <h4>🧾 Order: {o.orderId}</h4>
+    <p>Status: {o.status}</p>
+    <p>Date: {o.date}</p>
+
+    <strong>Items:</strong>
+    {o.items.map((item, idx) => (
+      <p key={idx}>
+        • {item.name} - ${item.price}
+      </p>
+    ))}
+
+    <h4>Total: ${o.total}</h4>
+
+    {/* 👇 TRACKING (only shows if exists) */}
+    {o.trackingNumber && (
+      <p>📦 Tracking: {o.trackingNumber}</p>
+    )}
+  </div>
+))}
 </div>
 </div>   
 
