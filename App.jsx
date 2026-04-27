@@ -331,49 +331,6 @@ window.location.href = data.url;
   ))}
 </div>
 
-      // ✅ Save order to Firebase
-      await addDoc(collection(db, "orders"), {
-        email: customerEmail,
-        items: cart,
-        total: totalValue,
-        date: new Date().toLocaleString(),
-        status: "Pending"
-      });
-
-      console.log("✅ Order saved");
-
-      // 🔥 Call Stripe API
-      console.log("🚀 Calling Stripe API...");
-      const res = await fetch("/api/create-checkout-session", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ items: cart })
-      });
-
-      console.log("📡 Response status:", res.status);
-
-      const data = await res.json();
-      console.log("💳 Stripe response:", data);
-
-      if (!data.url) {
-        alert("Stripe error — no URL returned");
-        console.log("❌ No Stripe URL");
-        return;
-      }
-
-      // ✅ Redirect to Stripe
-      window.location.href = data.url;
-
-    } catch (err) {
-      console.error("🔥 Checkout error:", err);
-      alert("Something went wrong — check console");
-    }
-  }}
->
-  Checkout 💳
-</button>
       </div>  
 
       </div> 
