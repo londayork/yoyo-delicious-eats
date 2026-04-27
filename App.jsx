@@ -282,74 +282,78 @@ window.location.href = data.url;
       )}
 
       {/* TRACK ORDER */}
-{/* TRACK ORDER */}
-<div style={{ background: "white", margin: 20, padding: 20 }}>
-  <h2>Track Order</h2>
+      {/* TRACK ORDER */}
+      <div style={{ background: "white", margin: 20, padding: 20 }}>
+        <h2>Track Order</h2>
 
-  <input
-    placeholder="Enter email"
-    value={customerEmail}
-    onChange={(e) => setCustomerEmail(e.target.value)}
-  />
+        <input
+          placeholder="Enter email"
+          value={customerEmail}
+          onChange={(e) => setCustomerEmail(e.target.value)}
+        />
 
-  <button
-    onClick={async () => {
-      try {
-        if (!customerEmail) {
-          alert("Enter email");
-          return;
-        }
+        <button
+          onClick={async () => {
+            try {
+              if (!customerEmail) {
+                alert("Enter email");
+                return;
+              }
 
-        const snap = await getDocs(collection(db, "orders"));
-        const results = snap.docs.map(doc => doc.data());
+              const snap = await getDocs(collection(db, "orders"));
+              const results = snap.docs.map(doc => doc.data());
 
-        const userOrders = results.filter(
-          o => o.email === customerEmail
-        );
+              const userOrders = results.filter(
+                o => o.email === customerEmail
+              );
 
-        if (userOrders.length === 0) {
-          alert("No orders found");
-        } else {
-          setOrders(userOrders);
-        }
+              if (userOrders.length === 0) {
+                alert("No orders found");
+              } else {
+                setOrders(userOrders);
+              }
 
-      } catch (err) {
-        console.error("❌ Track error:", err);
-        alert("Error tracking order");
-      }
-    }}
-  >
-    Track 📦
-  </button>
+            } catch (err) {
+              console.error("❌ Track error:", err);
+              alert("Error tracking order");
+            }
+          }}
+        >
+          Track 📦
+        </button>
 
-  {/* SHOW ORDERS */}
-  {orders.map((o, i) => (
-    <div key={i} style={{
-      background: "#fff0f5",
-      padding: 15,
-      marginTop: 10,
-      borderRadius: 10
-    }}>
-      <h4>🧾 Order: {o.orderId}</h4>
-      <p>Status: {o.status}</p>
-      <p>Date: {o.date}</p>
+        {/* SHOW ORDERS */}
+        {orders.map((o, i) => (
+          <div
+            key={i}
+            style={{
+              background: "#fff0f5",
+              padding: 15,
+              marginTop: 10,
+              borderRadius: 10
+            }}
+          >
+            <h4>🧾 Order: {o.orderId}</h4>
+            <p>Status: {o.status}</p>
+            <p>Date: {o.date}</p>
 
-      <strong>Items:</strong>
-      {o.items.map((item, idx) => (
-        <p key={idx}>
-          • {item.name} - ${item.price}
-        </p>
-      ))}
+            <strong>Items:</strong>
+            {o.items.map((item, idx) => (
+              <p key={idx}>
+                • {item.name} - ${item.price}
+              </p>
+            ))}
 
-      <h4>Total: ${o.total}</h4>
+            <h4>Total: ${o.total}</h4>
 
-      {o.trackingNumber && (
-        <p>📦 Tracking: {o.trackingNumber}</p>
-      )}
-    </div>
-  ))}
-</div>
-    
-</div>
-);
+            {o.trackingNumber && (
+              <p>📦 Tracking: {o.trackingNumber}</p>
+            )}
+          </div>
+        ))}
+      </div>
+
+    </div> {/* MAIN CONTAINER */}
+
+  );
 }
