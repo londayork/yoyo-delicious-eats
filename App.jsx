@@ -282,7 +282,6 @@ window.location.href = data.url;
       )}
 
       {/* TRACK ORDER */}
-      {/* TRACK ORDER */}
       <div style={{ background: "white", margin: 20, padding: 20 }}>
         <h2>Track Order</h2>
 
@@ -353,7 +352,7 @@ window.location.href = data.url;
         ))}
       </div>
 
-    </div> {/* MAIN CONTAINER */}
+    </div> {/* MAIN CONTAINER CLOSED */}
 
   );
 }
