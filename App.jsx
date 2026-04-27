@@ -330,10 +330,7 @@ window.location.href = data.url;
     </div>
   ))}
 </div>
-
-      </div>  
-
-      </div> 
+</div>   
 
   );
 }
