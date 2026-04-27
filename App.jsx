@@ -248,7 +248,7 @@ export default function YoYosStore() {
       items: cart,
       total: totalValue,
       date: new Date().toLocaleString(),
-      status: "Pending"
+      status: "Pending",
       trackingNumber: ""
     });
 
