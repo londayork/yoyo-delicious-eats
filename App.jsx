@@ -305,35 +305,57 @@ window.location.href = data.url;
 
   <button
     onClick={async () => {
-      try {
-        if (!customerEmail) {
-          alert("Enter email to track order");
-          return;
-        }
+  try {
+    if (!customerEmail) {
+      alert("Enter email");
+      return;
+    }
 
-        console.log("🔍 Searching for:", customerEmail);
+    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
-        const snap = await getDocs(collection(db, "orders"));
-        const results = snap.docs.map(doc => doc.data());
+    console.log("🔥 About to save order");
 
-        const userOrders = results.filter(
-          o => o.email === customerEmail
-        );
+    // ✅ SAVE ORDER FIRST
+    const orderId = "ORD-" + Date.now();
 
-        console.log("📦 Orders found:", userOrders);
+    await addDoc(collection(db, "orders"), {
+      orderId,
+      email: customerEmail,
+      items: cart,
+      total: totalValue,
+      date: new Date().toLocaleString(),
+      status: "Pending",
+      trackingNumber: ""
+    });
 
-        if (userOrders.length === 0) {
-          alert("No orders found");
-        } else {
-          setOrders(userOrders);
-          alert("Orders found! Check below 👇");
-        }
+    console.log("✅ Order saved");
 
-      } catch (err) {
-        console.error("❌ Track error:", err);
-        alert("Error tracking order — check console");
-      }
-    }}
+    // 🔥 THEN CALL STRIPE
+    console.log("🚀 Calling Stripe...");
+
+    const res = await fetch("/api/create-checkout-session", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ items: cart })
+    });
+
+    const data = await res.json();
+
+    if (!data.url) {
+      alert("Stripe error");
+      return;
+    }
+
+    // ✅ REDIRECT LAST
+    window.location.href = data.url;
+
+  } catch (err) {
+    console.error("❌ Checkout error:", err);
+    alert("Error — check console");
+  }
+}}
   >
     Track 📦
   </button>
