@@ -239,19 +239,7 @@ export default function YoYosStore() {
 
     const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
-    // Save order
-    const orderId = "ORD-" + Date.now();
-
-    await addDoc(collection(db, "orders"), {
-      orderId,
-      email: customerEmail,
-      items: cart,
-      total: totalValue,
-      date: new Date().toLocaleString(),
-      status: "Pending",
-      trackingNumber: ""
-    });
-
+   
     // 🔥 STRIPE CHECKOUT
     const res = await fetch("/api/checkout", {
       method: "POST",
@@ -294,6 +282,7 @@ window.location.href = data.url;
       )}
 
       {/* TRACK ORDER */}
+{/* TRACK ORDER */}
 <div style={{ background: "white", margin: 20, padding: 20 }}>
   <h2>Track Order</h2>
 
@@ -305,90 +294,58 @@ window.location.href = data.url;
 
   <button
     onClick={async () => {
-  try {
-    if (!customerEmail) {
-      alert("Enter email");
-      return;
-    }
+      try {
+        if (!customerEmail) {
+          alert("Enter email");
+          return;
+        }
 
-    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
+        const snap = await getDocs(collection(db, "orders"));
+        const results = snap.docs.map(doc => doc.data());
 
-    console.log("🔥 About to save order");
+        const userOrders = results.filter(
+          o => o.email === customerEmail
+        );
 
-    // ✅ SAVE ORDER FIRST
-    const orderId = "ORD-" + Date.now();
+        if (userOrders.length === 0) {
+          alert("No orders found");
+        } else {
+          setOrders(userOrders);
+        }
 
-    await addDoc(collection(db, "orders"), {
-      orderId,
-      email: customerEmail,
-      items: cart,
-      total: totalValue,
-      date: new Date().toLocaleString(),
-      status: "Pending",
-      trackingNumber: ""
-    });
-
-    console.log("✅ Order saved");
-
-    // 🔥 THEN CALL STRIPE
-    console.log("🚀 Calling Stripe...");
-
-    const res = await fetch("/api/create-checkout-session", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ items: cart })
-    });
-
-    const data = await res.json();
-
-    if (!data.url) {
-      alert("Stripe error");
-      return;
-    }
-
-    // ✅ REDIRECT LAST
-    window.location.href = data.url;
-
-  } catch (err) {
-    console.error("❌ Checkout error:", err);
-    alert("Error — check console");
-  }
-}}
+      } catch (err) {
+        console.error("❌ Track error:", err);
+        alert("Error tracking order");
+      }
+    }}
   >
     Track 📦
   </button>
 
   {/* SHOW ORDERS */}
-{orders.map((o, i) => (
-  <div key={i} style={{
-    background: "#fff0f5",
-    padding: 15,
-    marginTop: 10,
-    borderRadius: 10
-  }}>
-    <h4>🧾 Order: {o.orderId}</h4>
-    <p>Status: {o.status}</p>
-    <p>Date: {o.date}</p>
+  {orders.map((o, i) => (
+    <div key={i} style={{
+      background: "#fff0f5",
+      padding: 15,
+      marginTop: 10,
+      borderRadius: 10
+    }}>
+      <h4>🧾 Order: {o.orderId}</h4>
+      <p>Status: {o.status}</p>
+      <p>Date: {o.date}</p>
 
-    <strong>Items:</strong>
-    {o.items.map((item, idx) => (
-      <p key={idx}>
-        • {item.name} - ${item.price}
-      </p>
-    ))}
+      <strong>Items:</strong>
+      {o.items.map((item, idx) => (
+        <p key={idx}>
+          • {item.name} - ${item.price}
+        </p>
+      ))}
 
-    <h4>Total: ${o.total}</h4>
+      <h4>Total: ${o.total}</h4>
 
-    {/* 👇 TRACKING (only shows if exists) */}
-    {o.trackingNumber && (
-      <p>📦 Tracking: {o.trackingNumber}</p>
-    )}
-  </div>
-))}
+      {o.trackingNumber && (
+        <p>📦 Tracking: {o.trackingNumber}</p>
+      )}
+    </div>
+  ))}
 </div>
-</div>   
-
-  );
-}
