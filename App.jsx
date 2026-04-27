@@ -287,22 +287,40 @@ window.location.href = data.url;
           onChange={(e) => setCustomerEmail(e.target.value)}
         />
 
-        <button
- onClick={async () => {
-  console.log("🛒 Cart:", cart);
-  console.log("📧 Email:", customerEmail);
+      <button
+  onClick={async () => {
+    try {
+      if (!customerEmail) {
+        alert("Enter email to track order");
+        return;
+      }
 
-  if (!customerEmail) {
-    alert("Enter email");
-    console.log("❌ No email entered");
-    return;
-  }
+      console.log("🔍 Searching for:", customerEmail);
 
-  try {
-    const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
-    console.log("💰 Total:", totalValue);
+      const snap = await getDocs(collection(db, "orders"));
+      const results = snap.docs.map(doc => doc.data());
 
-    // continue checkout...
+      const userOrders = results.filter(
+        o => o.email === customerEmail
+      );
+
+      console.log("📦 Orders found:", userOrders);
+
+      if (userOrders.length === 0) {
+        alert("No orders found");
+      } else {
+        setOrders(userOrders);
+        alert("Orders found! Check below 👇");
+      }
+
+    } catch (err) {
+      console.error("❌ Track error:", err);
+      alert("Error tracking order — check console");
+    }
+  }}
+>
+  Track 📦
+</button>
 
       // ✅ Save order to Firebase
       await addDoc(collection(db, "orders"), {
