@@ -278,49 +278,58 @@ window.location.href = data.url;
       )}
 
       {/* TRACK ORDER */}
-      <div style={{ background: "white", margin: 20, padding: 20 }}>
-        <h2>Track Order</h2>
+<div style={{ background: "white", margin: 20, padding: 20 }}>
+  <h2>Track Order</h2>
 
-        <input
-          placeholder="Enter email"
-          value={customerEmail}
-          onChange={(e) => setCustomerEmail(e.target.value)}
-        />
+  <input
+    placeholder="Enter email"
+    value={customerEmail}
+    onChange={(e) => setCustomerEmail(e.target.value)}
+  />
 
-      <button
-  onClick={async () => {
-    try {
-      if (!customerEmail) {
-        alert("Enter email to track order");
-        return;
+  <button
+    onClick={async () => {
+      try {
+        if (!customerEmail) {
+          alert("Enter email to track order");
+          return;
+        }
+
+        console.log("🔍 Searching for:", customerEmail);
+
+        const snap = await getDocs(collection(db, "orders"));
+        const results = snap.docs.map(doc => doc.data());
+
+        const userOrders = results.filter(
+          o => o.email === customerEmail
+        );
+
+        console.log("📦 Orders found:", userOrders);
+
+        if (userOrders.length === 0) {
+          alert("No orders found");
+        } else {
+          setOrders(userOrders);
+          alert("Orders found! Check below 👇");
+        }
+
+      } catch (err) {
+        console.error("❌ Track error:", err);
+        alert("Error tracking order — check console");
       }
+    }}
+  >
+    Track 📦
+  </button>
 
-      console.log("🔍 Searching for:", customerEmail);
-
-      const snap = await getDocs(collection(db, "orders"));
-      const results = snap.docs.map(doc => doc.data());
-
-      const userOrders = results.filter(
-        o => o.email === customerEmail
-      );
-
-      console.log("📦 Orders found:", userOrders);
-
-      if (userOrders.length === 0) {
-        alert("No orders found");
-      } else {
-        setOrders(userOrders);
-        alert("Orders found! Check below 👇");
-      }
-
-    } catch (err) {
-      console.error("❌ Track error:", err);
-      alert("Error tracking order — check console");
-    }
-  }}
->
-  Track 📦
-</button>
+  {/* SHOW ORDERS */}
+  {orders.map((o, i) => (
+    <div key={i}>
+      <p>Status: {o.status}</p>
+      <p>Total: ${o.total}</p>
+    </div>
+  ))}
+</div>
 
       // ✅ Save order to Firebase
       await addDoc(collection(db, "orders"), {
