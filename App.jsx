@@ -47,7 +47,8 @@ export default function YoYosStore() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-
+  const params = new URLSearchParams(window.location.search);
+  const success = params.get("success");
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -112,7 +113,18 @@ export default function YoYosStore() {
 
   return (
     <div style={{ minHeight: "100vh", background: "#ffe4ec" }}>
-
+      {success && (
+  <div style={{
+    background: "green",
+    color: "white",
+    padding: 15,
+    margin: 20,
+    borderRadius: 10,
+    textAlign: "center"
+  }}>
+    🎉 Payment successful! Your order has been placed.
+  </div>
+)}
      {/* HEADER */}
 <div style={{
   display: "flex",
