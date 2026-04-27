@@ -25,12 +25,12 @@ import {
 
 // CONFIG
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "yoyo-delicious-eats.firebaseapp.com",
-  projectId: "yoyo-delicious-eats",
-  storageBucket: "yoyo-delicious-eats.firebasestorage.app",
-  messagingSenderId: "107422339618",
-  appId: "1:107422339618:web:ab40e45ae2238241efb07b"
+  apiKey: "AIzaSyBfGAT6RkXlVlQMN6RnwkY1abt3DxRM89w",
+  authDomain: "yo-yo-delicious-eats.firebaseapp.com",
+  projectId: "yo-yo-delicious-eats",
+  storageBucket: "yo-yo-delicious-eats.firebasestorage.app",
+  messagingSenderId: "974812326876",
+  appId: "1:974812326876:web:81a1ff84947a50880efd19",
 };
 
 const app = initializeApp(firebaseConfig);
