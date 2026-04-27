@@ -47,8 +47,14 @@ export default function YoYosStore() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+ const [success, setSuccess] = useState(false);
+
+useEffect(() => {
   const params = new URLSearchParams(window.location.search);
-  const success = params.get("success");
+  if (params.get("success")) {
+    setSuccess(true);
+  }
+}, []);
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -112,19 +118,22 @@ export default function YoYosStore() {
   const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
   return (
+  <>
     <div style={{ minHeight: "100vh", background: "#ffe4ec" }}>
       {success && (
-  <div style={{
-    background: "green",
-    color: "white",
-    padding: 15,
-    margin: 20,
-    borderRadius: 10,
-    textAlign: "center"
-  }}>
-    🎉 Payment successful! Your order has been placed.
-  </div>
-)}
+        <div
+          style={{
+            background: "green",
+            color: "white",
+            padding: 15,
+            margin: 20,
+            borderRadius: 10,
+            textAlign: "center"
+          }}
+        >
+          🎉 Payment successful! Your order has been placed.
+        </div>
+      )}
      {/* HEADER */}
 <div style={{
   display: "flex",
@@ -352,7 +361,7 @@ window.location.href = data.url;
         ))}
       </div>
 
-    </div> {/* MAIN CONTAINER CLOSED */}
-
-  );
+  </div>
+  </>
+);
 }
