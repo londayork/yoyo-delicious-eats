@@ -228,7 +228,10 @@ export default function YoYosStore() {
     const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
     // Save order
+    const orderId = "ORD-" + Date.now();
+
     await addDoc(collection(db, "orders"), {
+      orderId,
       email: customerEmail,
       items: cart,
       total: totalValue,
