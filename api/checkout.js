@@ -4,6 +4,10 @@ export default async function handler(req, res) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+    if (req.method !== "POST") {
+      return res.status(405).json({ error: "Method not allowed" });
+    }
+
     const { items } = req.body;
 
     if (!items || !items.length) {
@@ -11,12 +15,14 @@ export default async function handler(req, res) {
     }
 
     const session = await stripe.checkout.sessions.create({
-      mode: "payment",
       payment_method_types: ["card"],
+      mode: "payment",
       line_items: items.map(item => ({
         price_data: {
           currency: "usd",
-          product_data: { name: item.name },
+          product_data: {
+            name: item.name
+          },
           unit_amount: Math.round(item.price * 100)
         },
         quantity: 1
