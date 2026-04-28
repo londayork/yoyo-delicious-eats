@@ -25,12 +25,12 @@ import {
 
 // CONFIG
 const firebaseConfig = {
-  apiKey: "AIzaSyBfGAT6RkXlVlQMN6RnwkY1abt3DxRM89w",
-  authDomain: "yo-yo-delicious-eats.firebaseapp.com",
-  projectId: "yo-yo-delicious-eats",
-  storageBucket: "yo-yo-delicious-eats.firebasestorage.app",
-  messagingSenderId: "974812326876",
-  appId: "1:974812326876:web:81a1ff84947a50880efd19",
+  apiKey: "YOUR_API_KEY",
+  authDomain: "yoyo-delicious-eats.firebaseapp.com",
+  projectId: "yoyo-delicious-eats",
+  storageBucket: "yoyo-delicious-eats.firebasestorage.app",
+  messagingSenderId: "107422339618",
+  appId: "1:107422339618:web:ab40e45ae2238241efb07b"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -47,14 +47,9 @@ export default function YoYosStore() {
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
- const [success, setSuccess] = useState(false);
 
-useEffect(() => {
   const params = new URLSearchParams(window.location.search);
-  if (params.get("success")) {
-    setSuccess(true);
-  }
-}, []);
+  const success = params.get("success");
   const [newProduct, setNewProduct] = useState({
     name: "",
     price: "",
@@ -118,22 +113,20 @@ useEffect(() => {
   const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
   return (
-  <>
     <div style={{ minHeight: "100vh", background: "#ffe4ec" }}>
+
       {success && (
-        <div
-          style={{
-            background: "green",
-            color: "white",
-            padding: 15,
-            margin: 20,
-            borderRadius: 10,
-            textAlign: "center"
-          }}
-        >
-          🎉 Payment successful! Your order has been placed.
-        </div>
-      )}
+  <div style={{
+    background: "green",
+    color: "white",
+    padding: 15,
+    margin: 20,
+    borderRadius: 10,
+    textAlign: "center"
+  }}>
+    🎉 Payment successful! Your order has been placed.
+  </div>
+)}
      {/* HEADER */}
 <div style={{
   display: "flex",
@@ -240,7 +233,7 @@ useEffect(() => {
 
         <button
   onClick={async () => {
-    
+
 
     if (!customerEmail) {
       return alert("Enter email");
@@ -248,7 +241,18 @@ useEffect(() => {
 
     const totalValue = cart.reduce((sum, i) => sum + i.price, 0);
 
-   
+    // Save order
+    const orderId = "ORD-" + Date.now();
+
+    await addDoc(collection(db, "orders"), {
+      orderId,
+      email: customerEmail,
+      items: cart,
+      total: totalValue,
+      date: new Date().toLocaleString(),
+      status: "Pending"
+    });
+
     // 🔥 STRIPE CHECKOUT
     const res = await fetch("/api/checkout", {
       method: "POST",
@@ -291,77 +295,59 @@ window.location.href = data.url;
       )}
 
       {/* TRACK ORDER */}
-      <div style={{ background: "white", margin: 20, padding: 20 }}>
-        <h2>Track Order</h2>
+<div style={{ background: "white", margin: 20, padding: 20 }}>
+  <h2>Track Order</h2>
 
-        <input
-          placeholder="Enter email"
-          value={customerEmail}
-          onChange={(e) => setCustomerEmail(e.target.value)}
-        />
+  <input
+    placeholder="Enter email"
+    value={customerEmail}
+    onChange={(e) => setCustomerEmail(e.target.value)}
+  />
 
-        <button
-          onClick={async () => {
-            try {
-              if (!customerEmail) {
-                alert("Enter email");
-                return;
-              }
+  <button
+    onClick={async () => {
+      try {
+        if (!customerEmail) {
+          alert("Enter email to track order");
+          return;
+        }
 
-              const snap = await getDocs(collection(db, "orders"));
-              const results = snap.docs.map(doc => doc.data());
+        console.log("🔍 Searching for:", customerEmail);
 
-              const userOrders = results.filter(
-                o => o.email === customerEmail
-              );
+        const snap = await getDocs(collection(db, "orders"));
+        const results = snap.docs.map(doc => doc.data());
 
-              if (userOrders.length === 0) {
-                alert("No orders found");
-              } else {
-                setOrders(userOrders);
-              }
+        const userOrders = results.filter(
+          o => o.email === customerEmail
+        );
 
-            } catch (err) {
-              console.error("❌ Track error:", err);
-              alert("Error tracking order");
-            }
-          }}
-        >
-          Track 📦
-        </button>
+        console.log("📦 Orders found:", userOrders);
 
-        {/* SHOW ORDERS */}
-        {orders.map((o, i) => (
-          <div
-            key={i}
-            style={{
-              background: "#fff0f5",
-              padding: 15,
-              marginTop: 10,
-              borderRadius: 10
-            }}
-          >
-            <h4>🧾 Order: {o.orderId}</h4>
-            <p>Status: {o.status}</p>
-            <p>Date: {o.date}</p>
+        if (userOrders.length === 0) {
+          alert("No orders found");
+        } else {
+          setOrders(userOrders);
+          alert("Orders found! Check below 👇");
+        }
 
-            <strong>Items:</strong>
-            {o.items.map((item, idx) => (
-              <p key={idx}>
-                • {item.name} - ${item.price}
-              </p>
-            ))}
+      } catch (err) {
+        console.error("❌ Track error:", err);
+        alert("Error tracking order — check console");
+      }
+    }}
+  >
+    Track 📦
+  </button>
 
-            <h4>Total: ${o.total}</h4>
+  {/* SHOW ORDERS */}
+  {orders.map((o, i) => (
+    <div key={i}>
+      <p>Status: {o.status}</p>
+      <p>Total: ${o.total}</p>
+    </div>
+  ))}
+</div>
+</div>   
 
-            {o.trackingNumber && (
-              <p>📦 Tracking: {o.trackingNumber}</p>
-            )}
-          </div>
-        ))}
-      </div>
-
-  </div>
-  </>
-);
+  );
 }
