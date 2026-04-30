@@ -25,8 +25,8 @@ export default async function handler(req, res) {
         },
         quantity: 1
       })),
-      success_url: https://yoyo-delicious-eats-pyo1.vercel.app/
-      cancel_url: https://yoyo-delicious-eats-pyo1.vercel.app/
+      success_url: "https://yoyo-delicious-eats-pyo1.vercel.app/?success=true",
+      cancel_url: "https://yoyo-delicious-eats-pyo1.vercel.app"
     });
 
     return res.status(200).json({ url: session.url });
