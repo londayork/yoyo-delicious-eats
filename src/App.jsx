@@ -254,26 +254,34 @@ export default function YoYosStore() {
     });
 
     // 🔥 STRIPE CHECKOUT
- const res = await fetch("/api/checkout", {
-  method: "POST",
-  headers: {
-    "Content-Type": "application/json"
-  },
-  body: JSON.stringify({
-    items: cart,
-    email: customerEmail || "test@email.com"
-  })
-});
+const handleCheckout = async () => {
+  if (!customerEmail) {
+    alert("Please enter your email before checkout");
+    return;
+  }
 
-const data = await res.json();
-console.log("FULL RESPONSE:", data);
+  const res = await fetch("/api/checkout", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      items: cart,
+      email: customerEmail
+    })
+  });
 
-if (data.url) {
-  window.location.href = data.url;
-} else {
-  alert(data.error || "Checkout failed");
-}
+  const data = await res.json();
 
+  console.log("FULL RESPONSE:", data);
+
+  if (data.url) {
+    window.location.href = data.url;
+  } else {
+    alert(data.error || "Checkout failed");
+  }
+};
+    
     // 👉 Redirect to payment page
     if (!data.url) {
   alert("Stripe error: " + (data.error || "No URL returned"));
