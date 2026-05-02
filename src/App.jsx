@@ -254,15 +254,18 @@ export default function YoYosStore() {
     });
 
     // 🔥 STRIPE CHECKOUT
-    const res = await fetch("/api/checkout", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ items: cart })
-    });
+   const res = await fetch("/api/checkout", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify({
+    items: cart,
+    email: customerEmail
+  })
+});
 
-    const data = await res.json();
+const data = await res.json();
 
 console.log("FULL RESPONSE:", data);
 
