@@ -175,19 +175,57 @@ export default function YoYosStore() {
       ))}
 
       {/* CART */}
-      <h2>Cart</h2>
-      {cart.map((item, i) => (
-        <p key={i}>{item.name}</p>
-      ))}
+      <h1 style={{ textAlign: "center", marginBottom: 20 }}>
+  Yo-Yo’s Delicious Eats 🍰
+</h1>
 
-      <input
-        placeholder="Enter email"
-        value={customerEmail}
-        onChange={(e) => setCustomerEmail(e.target.value)}
-      />
+<div style={{
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))",
+  gap: 20
+}}>
+  {products.map(p => (
+    <div key={p.id} style={{
+      border: "1px solid #ddd",
+      padding: 15,
+      borderRadius: 12,
+      textAlign: "center",
+      background: "#fff",
+      boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
+    }}>
+      
+      {p.image && (
+        <img
+          src={p.image}
+          alt={p.name}
+          style={{
+            width: "100%",
+            height: 150,
+            objectFit: "cover",
+            borderRadius: 10
+          }}
+        />
+      )}
 
-      <button onClick={handleCheckout}>Checkout 💳</button>
+      <h3 style={{ margin: "10px 0" }}>{p.name}</h3>
+      <p style={{ fontWeight: "bold" }}>${p.price}</p>
 
+      <button
+        onClick={() => setCart(prev => [...prev, p])}
+        style={{
+          padding: "8px 12px",
+          background: "#ff4d6d",
+          color: "#fff",
+          border: "none",
+          borderRadius: 6,
+          cursor: "pointer"
+        }}
+      >
+        Add to Cart
+      </button>
+    </div>
+  ))}
+</div>
       {/* ADMIN */}
       {user && (
         <div>
