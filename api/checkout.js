@@ -4,7 +4,6 @@ module.exports = async function handler(req, res) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
-    // Only allow POST
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
     }
@@ -27,7 +26,6 @@ module.exports = async function handler(req, res) {
         quantity: 1
       })),
 
-      // ✅ ALWAYS use your main domain
       success_url: "https://yoyo-delicious-eats.vercel.app/?success=true",
       cancel_url: "https://yoyo-delicious-eats.vercel.app"
     });
