@@ -194,17 +194,16 @@ export default function YoYosStore() {
       boxShadow: "0 4px 10px rgba(0,0,0,0.05)"
     }}>
       
-      {p.image && (
-        <img
-          src={p.image}
-          alt={p.name}
-          style={{
-            width: "100%",
-            height: 150,
-            objectFit: "cover",
-            borderRadius: 10
-          }}
-        />
+<img
+  src={p.image || "https://via.placeholder.com/200"}
+  alt={p.name}
+  style={{
+    width: "100%",
+    height: 150,
+    objectFit: "cover",
+    borderRadius: 10
+  }}
+/>
       )}
 
       <h3 style={{ margin: "10px 0" }}>{p.name}</h3>
