@@ -4,11 +4,12 @@ module.exports = async function handler(req, res) {
   try {
     const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
+    // Only allow POST
     if (req.method !== "POST") {
       return res.status(405).json({ error: "Method not allowed" });
     }
 
-    const { items } = req.body;
+    const { items } = req.body || {};
 
     if (!items || !items.length) {
       return res.status(400).json({ error: "No items provided" });
@@ -25,8 +26,10 @@ module.exports = async function handler(req, res) {
         },
         quantity: 1
       })),
-      success_url: "https://yoyo-delicious-eats-pyo1.vercel.app/?success=true",
-      cancel_url: "https://yoyo-delicious-eats-pyo1.vercel.app"
+
+      // ✅ ALWAYS use your main domain
+      success_url: "https://yoyo-delicious-eats.vercel.app/?success=true",
+      cancel_url: "https://yoyo-delicious-eats.vercel.app"
     });
 
     return res.status(200).json({ url: session.url });
