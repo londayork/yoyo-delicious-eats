@@ -28,7 +28,7 @@ const firebaseConfig = {
   apiKey: "AIzaSyBfGAT6RkXlVlQMN6RnwkY1abt3DxRM89w",
   authDomain: "yo-yo-delicious-eats.firebaseapp.com",
   projectId: "yo-yo-delicious-eats",
-  storageBucket: "yo-yo-delicious-eats.appspot.com",
+  storageBucket: "yo-yo-delicious-eats.firebasestorage.app",
   messagingSenderId: "974812326876",
   appId: "1:974812326876:web:81a1ff84947a50880efd19",
   measurementId: "G-6E8R9XBF4C"
